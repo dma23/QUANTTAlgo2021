@@ -286,12 +286,22 @@ def times(n, length=1):
 class CreativeFluorescentOrangeButterfly(QCAlgorithm):
 
     def Initialize(self):
-        self.SetStartDate(2021, 6, 28)  # Set Start Date
+        self.SetStartDate(2020, 1, 1)  # Set Start Date
         self.SetCash(100000)  # Set Strategy Cash
+        
+        self.stock = []
+        
+        stocks = [
+            "AMD",
+            "AAPL",
+            "MSFT",
+            "TSLA"]
+            
+        for tick in stocks: 
+            self.stock.append(self.AddEquity(tick, Resolution.Daily))
 
-
-        self.tsla = self.AddEquity("TSLA", Resolution.Daily)
-        self.aapl = self.AddEquity("AAPL", Resolution.Daily)
+        #self.tsla = self.AddEquity("TSLA", Resolution.Daily)
+        #self.aapl = self.AddEquity("AAPL", Resolution.Daily)
 
 
     def OnData(self, data):
@@ -299,9 +309,7 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
             Arguments:
                 data: Slice object keyed by symbol containing the stock data
         '''
-
-
-
+        
         """
         symbToTimeSeries
             A function that takes in data from QuantConnect and converts it to an np.ndarray
@@ -309,14 +317,14 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
             Params:
             self: an object used by quantconnect
             symbol: a symbol object from quantconnect
+            
         """
-        name = self.tsla #by changing this it changes the stock for every function
-
+        
         def symbToTimeSeries(self, symbol):
             history = self.History(symbol, 90, Resolution.Daily)
             timeSeries = history[['close']].to_numpy
             return timeSeries
-        symbToTimeSeries(self, name.Symbol)
+        
 
         """
         Notes for whoever is using this, under the definition of Bollinger Bands on TradingView what this program should be
@@ -459,7 +467,10 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         """
         NOW WE BEGIN IMPLEMENTATION
         """
-
+        
+        for name in self.stock:
+            symbToTimeSeries(self, name.Symbol)
+        
 
         length = 90  # TRADE length
         trendLength = 90  # Trend Length, this defaults to 63 periods, 3 months or more...
@@ -604,5 +615,9 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         """
 
         if securityclose[0] > trend:
-            self.SetHoldings(name.Symbol, 1)
+            self.SetHoldings(name.Symbol, 0.1)
+        
+        #elif securityclose[0] <= trend:
+        #   self.SetHoldings(name.Symbol, -0.1)
+        
         
