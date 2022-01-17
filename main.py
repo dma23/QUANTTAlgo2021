@@ -313,7 +313,6 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         """
         symbToTimeSeries
             A function that takes in data from QuantConnect and converts it to an np.ndarray
-
             Params:
             self: an object used by quantconnect
             symbol: a symbol object from quantconnect
@@ -330,25 +329,18 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         Notes for whoever is using this, under the definition of Bollinger Bands on TradingView what this program should be
         doing is creating a band of three lines which are plotted in relation to security prices. The middle line is usually the
         SMA (simple moving average) but we're using a different method here in the form of GFBM.
-
         - Standard Brownian Motion is a stochastic process which is essentially a collection of random variables defined on a
           common probability space
-
         - This specific stochastic process models a random walk process which means it will randomly move either up or down
           simulating somewhat how the stock market will move up and down
-
         - STANDARD Brownian Motion ==> B(t) ~ N(0, t)
-
         - X(t) is a Brownian Motion PROCESS if
                                 X(t) = ( volatility * B(t) ) + ( drift * t )
                                                                |  ^mean^  |
-
          where {B(t), t>=0} is a STANDARD Brownian Motion
-
         - Geometric Brownian Motion can be defined as:
                                             Y(t) = exp(X(t))
           where X(t) is a Brownian Motion PROCESS
-
         Now the issue with using regular GBM is that it assumes everything is random with no correlation but the stock market
         does not necessarily always act in such a manner. It will sometimes follow trends and sometimes will revert to mean.
         This is where Geometric FRACTIONAL Brownian Motion comes in. This is a generalization of GBM and uses the Hurst exponent
@@ -376,7 +368,6 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         """
         The Hurst exponent will indicate for a specific stock whether it is random walk (h = 0.5), mean reverting (h < 0.5), or
         trending (h > 0.5). With this we will be able to predict more accurate future prices than if we were to use regular GBM.
-
         Now we will plug the hurst exponent into our GFBM equation (which was derived in the paper sent by Gabe) to create a
         series of predicted values of which we will then use as the median of our risk ranges. We will first need to calculate
         the drift and volatility based on past stock data
@@ -613,11 +604,10 @@ class CreativeFluorescentOrangeButterfly(QCAlgorithm):
         The Bullish/Bearish sentiment a simple comparison of the closing price to the trend line.  If the closing price
         is above the trend we are Bullish, if the closing price is below the trend we are Bearish.
         """
-
-        if securityclose[0] > trend:
-            self.SetHoldings(name.Symbol, 0.1)
         
-        #elif securityclose[0] <= trend:
-        #   self.SetHoldings(name.Symbol, -0.1)
-        
-        
+        if not self.Portfolio.Invested and securityclose[0] > 0:
+            self.SetHoldings(name.Symbol, 0.01)
+        elif self.Portfolio.Invested and securityclose[0] < 0: 
+            self.SetHoldings(name.Symbol, -1)
+        else:
+            self.SetHoldings(name.Symbol, 0.1) 
